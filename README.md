@@ -17,6 +17,7 @@ Some of the key components of the image are:
 |_NCCL_|**2.21.5**|
 |_Python_|**3.12.6**|
 |_LLVM_|**17.0.6**|
+|_Protobuf_|**27.3**|
 |_PyTorch_ / _LibTorch_|**2.3.1**|
 |_OpenCV_|**4.10**|
 

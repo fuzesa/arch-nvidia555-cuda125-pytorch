@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1.2
+# syntax = docker/dockerfile:1
 
 FROM archlinux
 
@@ -18,6 +18,10 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
 
 RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     pacman -Syu --noconfirm --needed archlinux-keyring ca-certificates
+
+# Install Protobuf 27.3 needed by OpenCV DNN
+RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
+    pacman -U --noconfirm https://archive.archlinux.org/packages/p/protobuf/protobuf-27.3-2-x86_64.pkg.tar.zst
 
 # Install other packages that aren't the most recent in the Arch repos
 # mostly LLVM / Clang related
@@ -48,11 +52,19 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
 RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     pacman -U --noconfirm https://archive.archlinux.org/packages/c/cuda/cuda-12.5.1-1-x86_64.pkg.tar.zst
 
+# Install OpenCV compiled with CUDA 12.5
+RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
+    pacman -U --noconfirm https://archive.archlinux.org/packages/o/opencv-cuda/opencv-cuda-4.10.0-4-x86_64.pkg.tar.zst
+
+RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
+    pacman -U --noconfirm https://archive.archlinux.org/packages/p/python-opencv/python-opencv-4.10.0-4-x86_64.pkg.tar.zst    
+
 # Install add'l packages
 RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     pacman -S --noconfirm --needed \    
     cmake \
     cudnn \
+    fasm \
     ffmpeg \
     fmt \    
     glew \
@@ -63,12 +75,9 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     libxkbcommon-x11 \
     magma-cuda \
     mold \
-    nasm \
     nccl \
-    ninja \
-    opencv-cuda \
-    openmpi \
-    python-opencv \
+    ninja \    
+    openmpi \    
     python-pytorch-opt-cuda \
     python-torchvision-cuda \
     qt6-5compat \
@@ -76,7 +85,6 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     qt6-wayland \
     ruff \
     torchvision-cuda \
-    uasm \
     uv \
     vtk \
     wget \
@@ -89,8 +97,7 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     xcb-util-keysyms \
     xcb-util-renderutil \
     xcb-util-wm \
-    xcb-util-xrm \
-    yasm
+    xcb-util-xrm
 
 # yay
 RUN mkdir -p /tmp/yay-build && \
