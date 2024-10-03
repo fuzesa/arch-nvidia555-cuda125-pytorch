@@ -23,6 +23,9 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
 RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     pacman -U --noconfirm https://archive.archlinux.org/packages/p/protobuf/protobuf-27.3-2-x86_64.pkg.tar.zst
 
+RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
+    pacman -U --noconfirm https://archive.archlinux.org/packages/p/python-protobuf/python-protobuf-27.3-2-x86_64.pkg.tar.zst
+
 # Install other packages that aren't the most recent in the Arch repos
 # mostly LLVM / Clang related
 RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
@@ -76,8 +79,8 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     magma-cuda \
     mold \
     nccl \
-    ninja \    
-    openmpi \    
+    ninja \
+    openmpi \
     python-pytorch-opt-cuda \
     python-torchvision-cuda \
     qt6-5compat \
@@ -99,6 +102,10 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
     xcb-util-wm \
     xcb-util-xrm
 
+# Update Protobuf to latest for build dep
+RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
+    pacman -S --noconfirm --needed protobuf python-protobuf
+
 # yay
 RUN mkdir -p /tmp/yay-build && \
   useradd -m -G wheel builder && passwd -d builder && \
@@ -114,6 +121,13 @@ RUN su - builder -c "cd /tmp/yay-build/yay && makepkg -irs --noconfirm"
 RUN su - builder -c "yay -S --noconfirm cusparselt tensorrt python-tensorrt matplotplusplus"
 
 RUN userdel -r builder
+
+# Reinstall compatible Protobuf
+# Install Protobuf 27.3 needed by OpenCV DNN
+RUN --mount=type=cache,sharing=locked,target=/var/cache/pacman \
+    pacman -U --noconfirm \
+    https://archive.archlinux.org/packages/p/protobuf/protobuf-27.3-2-x86_64.pkg.tar.zst \
+    https://archive.archlinux.org/packages/p/python-protobuf/python-protobuf-27.3-2-x86_64.pkg.tar.zst
 
 # Install Kineto Lib
 WORKDIR /Build
